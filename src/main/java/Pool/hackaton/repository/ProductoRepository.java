@@ -1,6 +1,6 @@
 package Pool.hackaton.repository;
 
-import Pool.hackaton.entity.Producto;
+import Pool.hackaton.model.Producto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -10,21 +10,21 @@ import java.util.List;
  * REPOSITORIO: Producto
  * ============================================================
  * JpaRepository<Producto, Integer> ya incluye gratis:
- *   save(p)          → INSERT o UPDATE
- *   findById(id)     → SELECT WHERE id = ?
- *   findAll()        → SELECT *
- *   deleteById(id)   → DELETE WHERE id = ?
- *   existsById(id)   → SELECT COUNT WHERE id = ?
+ *   save(p)          â†’ INSERT o UPDATE
+ *   findById(id)     â†’ SELECT WHERE id = ?
+ *   findAll()        â†’ SELECT *
+ *   deleteById(id)   â†’ DELETE WHERE id = ?
+ *   existsById(id)   â†’ SELECT COUNT WHERE id = ?
  *
- * Los métodos adicionales usan convención de nombres de Spring:
+ * Los mÃ©todos adicionales usan convenciÃ³n de nombres de Spring:
  * findBy + NombreCampo + Condicion
  *
- * ¿CÓMO AGREGAR UN NUEVO MÉTODO DE BÚSQUEDA?
+ * Â¿CÃ“MO AGREGAR UN NUEVO MÃ‰TODO DE BÃšSQUEDA?
  * -------------------------------------------------------------
  * Ejemplo: buscar por marca (si agregaste ese campo)
  *   List<Producto> findByMarcaAndEstadoTrue(String marca);
  *
- * Spring genera el SQL automáticamente. No hace falta escribirlo.
+ * Spring genera el SQL automÃ¡ticamente. No hace falta escribirlo.
  * ============================================================
  */
 @Repository
@@ -33,6 +33,9 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
     // SELECT * FROM PRODUCTOS WHERE estado = 1
     List<Producto> findByEstadoTrue();
 
+    List<Producto> findByEstadoFalse();
+
     // SELECT * FROM PRODUCTOS WHERE categoria = ? AND estado = 1
     List<Producto> findByCategoriaAndEstadoTrue(String categoria);
 }
+

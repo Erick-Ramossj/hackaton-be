@@ -1,7 +1,7 @@
-package Pool.hackaton.controller;
+package Pool.hackaton.rest;
 
 import Pool.hackaton.dto.UsuarioLoginResponseDTO;
-import Pool.hackaton.entity.Usuario;
+import Pool.hackaton.model.Usuario;
 import Pool.hackaton.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +16,12 @@ import java.util.Map;
  * Base URL: /api/usuarios
  * ============================================================
  * RESUMEN DE ENDPOINTS:
- *   GET    /api/usuarios          → listar todos
- *   GET    /api/usuarios/{id}     → buscar por ID
- *   POST   /api/usuarios          → crear
- *   PUT    /api/usuarios/{id}     → actualizar
- *   DELETE /api/usuarios/{id}     → baja lógica
- *   POST   /api/usuarios/login    → autenticación
+ *   GET    /api/usuarios          â†’ listar todos
+ *   GET    /api/usuarios/{id}     â†’ buscar por ID
+ *   POST   /api/usuarios          â†’ crear
+ *   PUT    /api/usuarios/{id}     â†’ actualizar
+ *   DELETE /api/usuarios/{id}     â†’ baja lÃ³gica
+ *   POST   /api/usuarios/login    â†’ autenticaciÃ³n
  * ============================================================
  */
 @RestController
@@ -64,6 +64,14 @@ public class UsuarioController {
                   : ResponseEntity.notFound().build();
     }
 
+    // PUT /api/usuarios/{id}/restaurar → restauración lógica
+    @PutMapping("/{id}/restaurar")
+    public ResponseEntity<String> restaurar(@PathVariable Integer id) {
+        boolean ok = usuarioService.restaurar(id);
+        return ok ? ResponseEntity.ok("Usuario restaurado")
+                  : ResponseEntity.notFound().build();
+    }
+
     /**
      * POST /api/usuarios/login
      * Recibe: { "usuario": "admin", "password": "12345" }
@@ -82,3 +90,5 @@ public class UsuarioController {
                 .orElse(ResponseEntity.status(401).body("Credenciales incorrectas"));
     }
 }
+
+

@@ -1,6 +1,6 @@
 package Pool.hackaton.repository;
 
-import Pool.hackaton.entity.Cliente;
+import Pool.hackaton.model.Cliente;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -9,11 +9,11 @@ import java.util.List;
  * ============================================================
  * REPOSITORIO: Cliente
  * ============================================================
- * ¿CÓMO AGREGAR UN NUEVO MÉTODO?
+ * Â¿CÃ“MO AGREGAR UN NUEVO MÃ‰TODO?
  * -------------------------------------------------------------
- * Ejemplo: buscar clientes por nombre (búsqueda parcial)
+ * Ejemplo: buscar clientes por nombre (bÃºsqueda parcial)
  *   List<Cliente> findByNombreContainingIgnoreCase(String nombre);
- *   → genera: SELECT * FROM CLIENTES WHERE nombre LIKE '%?%'
+ *   â†’ genera: SELECT * FROM CLIENTES WHERE nombre LIKE '%?%'
  * ============================================================
  */
 @Repository
@@ -25,6 +25,7 @@ public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
     // Verifica si ya existe un cliente con ese DNI (para evitar duplicados)
     boolean existsByDni(String dni);
 
-    // Verifica duplicado de DNI excluyendo al propio cliente (para validar en edición)
+    // Verifica duplicado de DNI excluyendo al propio cliente (para validar en ediciÃ³n)
     boolean existsByDniAndIdClienteNot(String dni, Integer idCliente);
 }
+

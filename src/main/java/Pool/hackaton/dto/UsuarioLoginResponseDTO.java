@@ -1,6 +1,6 @@
 package Pool.hackaton.dto;
 
-import Pool.hackaton.entity.Usuario;
+import Pool.hackaton.model.Usuario;
 import lombok.Data;
 
 /**
@@ -28,3 +28,4 @@ public class UsuarioLoginResponseDTO {
         return dto;
     }
 }
+

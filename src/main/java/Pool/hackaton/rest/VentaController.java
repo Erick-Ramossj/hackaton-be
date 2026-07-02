@@ -1,7 +1,7 @@
-package Pool.hackaton.controller;
+package Pool.hackaton.rest;
 
 import Pool.hackaton.dto.VentaRequestDTO;
-import Pool.hackaton.entity.Venta;
+import Pool.hackaton.model.Venta;
 import Pool.hackaton.service.VentaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +15,9 @@ import java.util.List;
  * Base URL: /api/ventas
  * ============================================================
  * RESUMEN DE ENDPOINTS:
- *   GET  /api/ventas       → listar todas las ventas
- *   GET  /api/ventas/{id}  → buscar venta por ID (incluye detalles)
- *   POST /api/ventas       → registrar nueva venta
+ *   GET  /api/ventas       â†’ listar todas las ventas
+ *   GET  /api/ventas/{id}  â†’ buscar venta por ID (incluye detalles)
+ *   POST /api/ventas       â†’ registrar nueva venta
  *
  * El POST recibe un VentaRequestDTO (no la entidad directamente)
  * porque necesita IDs simples, no objetos anidados completos.
@@ -37,7 +37,7 @@ public class VentaController {
     }
 
     // Al buscar por ID, la respuesta incluye los detalles de la venta
-    // gracias a la relación @OneToMany en la entidad Venta
+    // gracias a la relaciÃ³n @OneToMany en la entidad Venta
     @GetMapping("/{id}")
     public ResponseEntity<Venta> buscarPorId(@PathVariable Integer id) {
         return ventaService.buscarPorId(id)
@@ -71,3 +71,5 @@ public class VentaController {
         }
     }
 }
+
+

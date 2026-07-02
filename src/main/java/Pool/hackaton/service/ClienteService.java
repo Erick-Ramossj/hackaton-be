@@ -1,36 +1,20 @@
 package Pool.hackaton.service;
 
-import Pool.hackaton.entity.Cliente;
+import Pool.hackaton.model.Cliente;
 import Pool.hackaton.repository.ClienteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * ============================================================
- * SERVICIO: Cliente
- * ============================================================
- * Lógica de negocio para clientes.
- *
- * ¿CÓMO AGREGAR UNA NUEVA VALIDACIÓN?
- * -------------------------------------------------------------
- * Ejemplo: validar que el email no esté duplicado
- * 1. En ClienteRepository agregar:
- *       boolean existsByEmail(String email);
- * 2. Aquí en guardar():
- *       if (clienteRepository.existsByEmail(cliente.getEmail())) {
- *           throw new RuntimeException("Email ya registrado");
- *       }
- * ============================================================
- */
 @Service
 @RequiredArgsConstructor
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
 
-    // Solo clientes activos (estado = true)
     public List<Cliente> listar() {
         return clienteRepository.findByEstadoTrue();
     }
@@ -40,11 +24,26 @@ public class ClienteService {
     }
 
     public Cliente guardar(Cliente cliente) {
-        // Valida DNI duplicado tanto al crear como al editar,
-        // excluyendo al propio cliente en caso de actualización
+        LocalDateTime ahora = LocalDateTime.now();
         Integer idActual = cliente.getIdCliente() == null ? -1 : cliente.getIdCliente();
+
+        // Validar DNI duplicado tanto al crear como al editar
         if (clienteRepository.existsByDniAndIdClienteNot(cliente.getDni(), idActual)) {
             throw new RuntimeException("Ya existe un cliente con el DNI: " + cliente.getDni());
+        }
+
+        if (cliente.getIdCliente() == null) {
+            // CREAR
+            cliente.setCreatedAt(ahora);
+            cliente.setUpdatedAt(null);
+            cliente.setDeletedAt(null);
+            cliente.setRestoredAt(null);
+        } else {
+            // ACTUALIZAR: conservar created_at original
+            clienteRepository.findById(cliente.getIdCliente()).ifPresent(
+                existente -> cliente.setCreatedAt(existente.getCreatedAt())
+            );
+            cliente.setUpdatedAt(ahora);
         }
         return clienteRepository.save(cliente);
     }
@@ -55,6 +54,23 @@ public class ClienteService {
         if (opt.isPresent()) {
             Cliente c = opt.get();
             c.setEstado(false);
+            c.setDeletedAt(LocalDateTime.now());
+            c.setUpdatedAt(LocalDateTime.now());
+            clienteRepository.save(c);
+            return true;
+        }
+        return false;
+    }
+
+    // Restauración lógica
+    public boolean restaurar(Integer id) {
+        Optional<Cliente> opt = clienteRepository.findById(id);
+        if (opt.isPresent()) {
+            Cliente c = opt.get();
+            c.setEstado(true);
+            c.setRestoredAt(LocalDateTime.now());
+            c.setDeletedAt(null);
+            c.setUpdatedAt(LocalDateTime.now());
             clienteRepository.save(c);
             return true;
         }

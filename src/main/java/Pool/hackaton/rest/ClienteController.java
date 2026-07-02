@@ -1,6 +1,6 @@
-package Pool.hackaton.controller;
+package Pool.hackaton.rest;
 
-import Pool.hackaton.entity.Cliente;
+import Pool.hackaton.model.Cliente;
 import Pool.hackaton.service.ClienteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +14,11 @@ import java.util.List;
  * Base URL: /api/clientes
  * ============================================================
  * RESUMEN DE ENDPOINTS:
- *   GET    /api/clientes          → listar activos
- *   GET    /api/clientes/{id}     → buscar por ID
- *   POST   /api/clientes          → crear
- *   PUT    /api/clientes/{id}     → actualizar
- *   DELETE /api/clientes/{id}     → baja lógica
+ *   GET    /api/clientes          â†’ listar activos
+ *   GET    /api/clientes/{id}     â†’ buscar por ID
+ *   POST   /api/clientes          â†’ crear
+ *   PUT    /api/clientes/{id}     â†’ actualizar
+ *   DELETE /api/clientes/{id}     â†’ baja lÃ³gica
  * ============================================================
  */
 @RestController
@@ -42,7 +42,7 @@ public class ClienteController {
     }
 
     // ResponseEntity<?> con "?" permite retornar tanto un Cliente (200)
-    // como un String de error (400) según lo que pase en el service
+    // como un String de error (400) segÃºn lo que pase en el service
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody Cliente cliente) {
         try {
@@ -66,4 +66,14 @@ public class ClienteController {
         return ok ? ResponseEntity.ok("Cliente desactivado")
                   : ResponseEntity.notFound().build();
     }
+
+    // PUT /api/clientes/{id}/restaurar → restauración lógica
+    @PutMapping("/{id}/restaurar")
+    public ResponseEntity<String> restaurar(@PathVariable Integer id) {
+        boolean ok = clienteService.restaurar(id);
+        return ok ? ResponseEntity.ok("Cliente restaurado")
+                  : ResponseEntity.notFound().build();
+    }
 }
+
+

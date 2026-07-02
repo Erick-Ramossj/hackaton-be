@@ -2,7 +2,7 @@ package Pool.hackaton.service;
 
 import Pool.hackaton.dto.DetalleVentaDTO;
 import Pool.hackaton.dto.VentaRequestDTO;
-import Pool.hackaton.entity.*;
+import Pool.hackaton.model.*;
 import Pool.hackaton.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,18 +18,18 @@ import java.util.Optional;
  * ============================================================
  * SERVICIO: Venta
  * ============================================================
- * La operación más importante: registrarVenta()
+ * La operaciÃ³n mÃ¡s importante: registrarVenta()
  *
  * @Transactional garantiza ATOMICIDAD:
  * Si cualquier paso falla (stock insuficiente, producto no existe,
  * error de BD, etc.), se revierten TODOS los cambios.
  * Es decir, o se guarda todo o no se guarda nada.
  *
- * ¿CÓMO AGREGAR LÓGICA EXTRA AL REGISTRAR UNA VENTA?
+ * Â¿CÃ“MO AGREGAR LÃ“GICA EXTRA AL REGISTRAR UNA VENTA?
  * -------------------------------------------------------------
- * Ejemplo: enviar un correo de confirmación
- * → Agrega el servicio de correo con @RequiredArgsConstructor
- *   y llámalo al final de registrarVenta(), después del save().
+ * Ejemplo: enviar un correo de confirmaciÃ³n
+ * â†’ Agrega el servicio de correo con @RequiredArgsConstructor
+ *   y llÃ¡malo al final de registrarVenta(), despuÃ©s del save().
  * ============================================================
  */
 @Service
@@ -54,15 +54,15 @@ public class VentaService {
      * Pasos en orden:
      *   1. Validar que cliente y usuario existan
      *   2. Crear la cabecera de la venta
-     *   3. Por cada producto: verificar stock → descontar stock → crear detalle
+     *   3. Por cada producto: verificar stock â†’ descontar stock â†’ crear detalle
      *   4. Calcular el total
-     *   5. Guardar la venta (JPA guarda los detalles automáticamente por CascadeType.ALL)
+     *   5. Guardar la venta (JPA guarda los detalles automÃ¡ticamente por CascadeType.ALL)
      */
     @Transactional
     public Venta registrarVenta(VentaRequestDTO request) {
 
-        // Paso 1: Buscar cliente y usuario. Si no existen lanza excepción
-        // orElseThrow detiene la ejecución y el @Transactional revierte todo
+        // Paso 1: Buscar cliente y usuario. Si no existen lanza excepciÃ³n
+        // orElseThrow detiene la ejecuciÃ³n y el @Transactional revierte todo
         Cliente cliente = clienteRepository.findById(request.getIdCliente())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado: " + request.getIdCliente()));
 
@@ -76,7 +76,7 @@ public class VentaService {
         venta.setFecha(LocalDateTime.now()); // Fecha actual del servidor Java
         venta.setTotal(BigDecimal.ZERO);     // Se actualiza en el paso 4
 
-        // Paso 3: Procesar cada ítem del detalle
+        // Paso 3: Procesar cada Ã­tem del detalle
         List<DetalleVenta> detalles = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
 
@@ -103,7 +103,7 @@ public class VentaService {
             detalle.setCantidad(item.getCantidad());
             detalle.setPrecioUnitario(producto.getPrecio());  // Precio al momento de la venta
 
-            // Acumular al total: subtotal = precio × cantidad
+            // Acumular al total: subtotal = precio Ã— cantidad
             BigDecimal subtotal = producto.getPrecio().multiply(new BigDecimal(item.getCantidad()));
             total = total.add(subtotal);
 
@@ -114,7 +114,8 @@ public class VentaService {
         venta.setTotal(total);
         venta.setDetalles(detalles);
 
-        // Paso 5: Guardar. CascadeType.ALL guarda los detalles automáticamente
+        // Paso 5: Guardar. CascadeType.ALL guarda los detalles automÃ¡ticamente
         return ventaRepository.save(venta);
     }
 }
+

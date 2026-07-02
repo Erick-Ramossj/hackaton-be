@@ -1,43 +1,24 @@
 package Pool.hackaton.service;
 
-import Pool.hackaton.entity.Usuario;
+import Pool.hackaton.model.Usuario;
 import Pool.hackaton.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * ============================================================
- * SERVICIO: Usuario
- * ============================================================
- * Contiene toda la lógica de negocio para usuarios.
- *
- * FLUJO DE UNA PETICIÓN:
- *   Frontend → Controller → Service → Repository → BD
- *
- * @RequiredArgsConstructor (Lombok): genera el constructor con
- * todos los campos "final", que es como Spring inyecta dependencias.
- * Es equivalente a poner @Autowired pero más limpio.
- * ============================================================
- */
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
 
-    /**
-     * LOGIN SIMPLE
-     * Retorna Optional: si encuentra el usuario → Optional.of(usuario)
-     * Si no lo encuentra → Optional.empty()
-     * El controller decide qué respuesta HTTP enviar según el resultado.
-     */
     public Optional<Usuario> login(String usuario, String password) {
         return usuarioRepository.findByUsuarioAndPassword(usuario, password);
     }
 
-    // Retorna todos los usuarios (activos e inactivos)
     public List<Usuario> listar() {
         return usuarioRepository.findAll();
     }
@@ -46,25 +27,50 @@ public class UsuarioService {
         return usuarioRepository.findById(id);
     }
 
-    // Sirve tanto para crear (id = null) como para actualizar (id presente)
     public Usuario guardar(Usuario usuario) {
+        LocalDateTime ahora = LocalDateTime.now();
+        if (usuario.getIdUsuario() == null) {
+            // CREAR
+            usuario.setCreatedAt(ahora);
+            usuario.setUpdatedAt(null);
+            usuario.setDeletedAt(null);
+            usuario.setRestoredAt(null);
+        } else {
+            // ACTUALIZAR: conservar created_at original
+            usuarioRepository.findById(usuario.getIdUsuario()).ifPresent(
+                existente -> usuario.setCreatedAt(existente.getCreatedAt())
+            );
+            usuario.setUpdatedAt(ahora);
+        }
         return usuarioRepository.save(usuario);
     }
 
-    /**
-     * BAJA LÓGICA
-     * No borra el registro de la BD, solo cambia estado a false.
-     * Esto preserva la integridad referencial (si el usuario tiene
-     * ventas asociadas, no se puede borrar físicamente).
-     */
+    // Baja lógica
     public boolean eliminar(Integer id) {
         Optional<Usuario> opt = usuarioRepository.findById(id);
         if (opt.isPresent()) {
             Usuario u = opt.get();
             u.setEstado(false);
+            u.setDeletedAt(LocalDateTime.now());
+            u.setUpdatedAt(LocalDateTime.now());
             usuarioRepository.save(u);
             return true;
         }
-        return false; // No existe
+        return false;
+    }
+
+    // Restauración lógica
+    public boolean restaurar(Integer id) {
+        Optional<Usuario> opt = usuarioRepository.findById(id);
+        if (opt.isPresent()) {
+            Usuario u = opt.get();
+            u.setEstado(true);
+            u.setRestoredAt(LocalDateTime.now());
+            u.setDeletedAt(null);
+            u.setUpdatedAt(LocalDateTime.now());
+            usuarioRepository.save(u);
+            return true;
+        }
+        return false;
     }
 }
