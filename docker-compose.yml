@@ -1,20 +1,28 @@
 version: '3.8'
 
+# ============================================================
+# EC2: SUBRED PRIVADA — Backend Spring Boot
+# ============================================================
+# Security Group de esta EC2:
+#   Inbound:  TCP 8080  desde  sg-frontend
+#   Inbound:  TCP 22    desde  tu IP (SSH)
+#   Outbound: TCP 1433  hacia  sg-database
+#   Outbound: TCP 443   hacia  0.0.0.0/0  (para descargar imagen Maven)
+# ============================================================
+
 services:
 
-  # ==========================================
-  # BACKEND: Spring Boot
-  # ==========================================
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: techstore-backend
+    container_name: backend
     ports:
       - "8080:8080"
     environment:
-      # "techstore-sqlserver" es el nombre del contenedor de la BD
-      SPRING_DATASOURCE_URL: "jdbc:sqlserver://techstore-sqlserver:1433;databaseName=TechStore;encrypt=true;trustServerCertificate=true"
+      # ← Reemplaza IP_PRIVADA_BD con la IP privada real de la EC2 de base de datos
+      # Ejemplo: 10.0.2.45
+      SPRING_DATASOURCE_URL: "jdbc:sqlserver://IP_PRIVADA_BD:1433;databaseName=TechStore;encrypt=true;trustServerCertificate=true"
       SPRING_DATASOURCE_USERNAME: "sa"
       SPRING_DATASOURCE_PASSWORD: "TechStore_2026!"
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
@@ -22,23 +30,22 @@ services:
       SPRING_JPA_DATABASE_PLATFORM: "org.hibernate.dialect.SQLServerDialect"
       SPRING_JPA_OPEN_IN_VIEW: "false"
       SERVER_PORT: "8080"
-    networks:
-      - database_techstore-network
+    restart: unless-stopped
 
-networks:
-  # Red externa: la crea el docker-compose de la BD (database/docker-compose.yml)
-  # Docker le agrega el prefijo del nombre de la carpeta: "database_techstore-network"
-  database_techstore-network:
-    external: true
-
-# ==========================================
-# COMANDOS UTILES
-# ==========================================
-# 1. Primero levanta la BD (desde la carpeta database/):
-#    docker compose up -d
+# ============================================================
+# PASOS EN LA EC2 DE BACKEND:
+# ============================================================
+# 1. Instalar Docker (igual que la EC2 de BD)
 #
-# 2. Luego levanta el backend (desde esta carpeta):
+# 2. Subir los archivos del proyecto:
+#    scp -r hackaton/ ec2-user@IP_PRIVADA_BACKEND:~/hackaton/
+#
+# 3. Editar este archivo y reemplazar IP_PRIVADA_BD:
+#    nano ~/hackaton/docker-compose.yml
+#
+# 4. Levantar (construye el JAR dentro del contenedor):
+#    cd ~/hackaton
 #    docker compose up -d --build
 #
-# Ver logs:  docker logs techstore-backend -f
+# Ver logs:  docker logs backend -f
 # Bajar:     docker compose down

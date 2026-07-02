@@ -40,9 +40,10 @@ public class ClienteService {
     }
 
     public Cliente guardar(Cliente cliente) {
-        // Al CREAR (id es null), verificar que el DNI no esté duplicado
-        // Al ACTUALIZAR (id presente), se omite esta validación
-        if (cliente.getIdCliente() == null && clienteRepository.existsByDni(cliente.getDni())) {
+        // Valida DNI duplicado tanto al crear como al editar,
+        // excluyendo al propio cliente en caso de actualización
+        Integer idActual = cliente.getIdCliente() == null ? -1 : cliente.getIdCliente();
+        if (clienteRepository.existsByDniAndIdClienteNot(cliente.getDni(), idActual)) {
             throw new RuntimeException("Ya existe un cliente con el DNI: " + cliente.getDni());
         }
         return clienteRepository.save(cliente);

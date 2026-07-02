@@ -1,5 +1,6 @@
 package Pool.hackaton.controller;
 
+import Pool.hackaton.dto.UsuarioLoginResponseDTO;
 import Pool.hackaton.entity.Usuario;
 import Pool.hackaton.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -77,7 +78,7 @@ public class UsuarioController {
         String password = credenciales.get("password");
 
         return usuarioService.login(usuario, password)
-                .map(u -> ResponseEntity.ok((Object) u))
+                .map(u -> ResponseEntity.ok((Object) UsuarioLoginResponseDTO.from(u)))
                 .orElse(ResponseEntity.status(401).body("Credenciales incorrectas"));
     }
 }
