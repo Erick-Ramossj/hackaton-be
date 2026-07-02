@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+
+  # ==========================================
+  # BACKEND: Spring Boot
+  # ==========================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: techstore-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # "techstore-sqlserver" es el nombre del contenedor de la BD
+      SPRING_DATASOURCE_URL: "jdbc:sqlserver://techstore-sqlserver:1433;databaseName=TechStore;encrypt=true;trustServerCertificate=true"
+      SPRING_DATASOURCE_USERNAME: "sa"
+      SPRING_DATASOURCE_PASSWORD: "TechStore_2026!"
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
+      SPRING_JPA_DATABASE_PLATFORM: "org.hibernate.dialect.SQLServerDialect"
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+      SERVER_PORT: "8080"
+    networks:
+      - database_techstore-network
+
+networks:
+  # Red externa: la crea el docker-compose de la BD (database/docker-compose.yml)
+  # Docker le agrega el prefijo del nombre de la carpeta: "database_techstore-network"
+  database_techstore-network:
+    external: true
+
+# ==========================================
+# COMANDOS UTILES
+# ==========================================
+# 1. Primero levanta la BD (desde la carpeta database/):
+#    docker compose up -d
+#
+# 2. Luego levanta el backend (desde esta carpeta):
+#    docker compose up -d --build
+#
+# Ver logs:  docker logs techstore-backend -f
+# Bajar:     docker compose down
