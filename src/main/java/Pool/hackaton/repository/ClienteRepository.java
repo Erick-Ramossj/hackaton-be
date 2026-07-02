@@ -19,13 +19,12 @@ import java.util.List;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
 
-    // Solo clientes activos
     List<Cliente> findByEstadoTrue();
 
-    // Verifica si ya existe un cliente con ese DNI (para evitar duplicados)
+    List<Cliente> findByEstadoFalse();
+
     boolean existsByDni(String dni);
 
-    // Verifica duplicado de DNI excluyendo al propio cliente (para validar en ediciÃ³n)
     boolean existsByDniAndIdClienteNot(String dni, Integer idCliente);
 }
 

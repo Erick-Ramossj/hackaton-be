@@ -2,6 +2,9 @@ package Pool.hackaton.rest;
 
 import Pool.hackaton.model.Producto;
 import Pool.hackaton.service.ProductoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,19 +22,16 @@ public class ProductoController {
 
     private final ProductoService productoService;
 
-    // GET /api/productos -> lista productos ACTIVOS
     @GetMapping
     public List<Producto> listar() {
         return productoService.listar();
     }
 
-    // GET /api/productos/inactivos -> lista productos INACTIVOS (eliminados logicamente)
     @GetMapping("/inactivos")
     public List<Producto> listarInactivos() {
         return productoService.listarInactivos();
     }
 
-    // GET /api/productos/{id}
     @GetMapping("/{id}")
     public ResponseEntity<Producto> buscarPorId(@PathVariable Integer id) {
         return productoService.buscarPorId(id)
@@ -39,13 +39,11 @@ public class ProductoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST /api/productos -> crear
     @PostMapping
     public ResponseEntity<Producto> crear(@RequestBody Producto producto) {
         return ResponseEntity.ok(productoService.guardar(producto));
     }
 
-    // PUT /api/productos/{id} -> actualizar
     @PutMapping("/{id}")
     public ResponseEntity<Producto> actualizar(@PathVariable Integer id, @RequestBody Producto producto) {
         return productoService.buscarPorId(id).map(existente -> {
@@ -54,7 +52,6 @@ public class ProductoController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // DELETE /api/productos/{id} -> baja logica: estado=false, deleted_at=now
     @DeleteMapping(value = "/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         boolean ok = productoService.eliminar(id);
@@ -62,7 +59,6 @@ public class ProductoController {
                   : ResponseEntity.notFound().build();
     }
 
-    // PUT /api/productos/{id}/restaurar -> restauracion logica: estado=true, restored_at=now
     @PutMapping(value = "/{id}/restaurar", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> restaurar(@PathVariable Integer id) {
         boolean ok = productoService.restaurar(id);
@@ -70,9 +66,16 @@ public class ProductoController {
                   : ResponseEntity.notFound().build();
     }
 
-    // POST /api/productos/importar/csv
-    @PostMapping(value = "/importar/csv", produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> importarCSV(@RequestParam("archivo") MultipartFile archivo) {
+    // ---- IMPORTACION ----
+    // consumes = MULTIPART_FORM_DATA_VALUE hace que Swagger muestre el campo de archivo
+    @Operation(summary = "Importar productos desde CSV",
+               description = "Formato: nombre,descripcion,categoria,precio,stock (una fila por producto)")
+    @PostMapping(value = "/importar/csv",
+                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+                 produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> importarCSV(
+            @Parameter(description = "Archivo CSV", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
+            @RequestParam("archivo") MultipartFile archivo) {
         try {
             int total = productoService.importarDesdeCSV(archivo);
             return ResponseEntity.ok("Se importaron " + total + " productos desde CSV.");
@@ -81,9 +84,14 @@ public class ProductoController {
         }
     }
 
-    // POST /api/productos/importar/excel
-    @PostMapping(value = "/importar/excel", produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> importarExcel(@RequestParam("archivo") MultipartFile archivo) {
+    @Operation(summary = "Importar productos desde Excel (.xlsx)",
+               description = "Cabecera en fila 1: nombre | descripcion | categoria | precio | stock")
+    @PostMapping(value = "/importar/excel",
+                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+                 produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> importarExcel(
+            @Parameter(description = "Archivo Excel .xlsx", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
+            @RequestParam("archivo") MultipartFile archivo) {
         try {
             int total = productoService.importarDesdeExcel(archivo);
             return ResponseEntity.ok("Se importaron " + total + " productos desde Excel.");
@@ -92,7 +100,7 @@ public class ProductoController {
         }
     }
 
-    // GET /api/productos/exportar/excel
+    // ---- EXPORTACION ----
     @GetMapping("/exportar/excel")
     public ResponseEntity<byte[]> exportarExcel() {
         try {
@@ -107,7 +115,6 @@ public class ProductoController {
         }
     }
 
-    // GET /api/productos/exportar/pdf
     @GetMapping("/exportar/pdf")
     public ResponseEntity<byte[]> exportarPDF() {
         try {
